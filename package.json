@@ -1,0 +1,16 @@
+{
+  "name": "client-proposals",
+  "version": "0.0.1",
+  "description": "Immense Networks client proposal generator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Christian Bankester",
+  "license": "ISC",
+  "dependencies": {
+    "ff": "^0.2.1",
+    "grunt": "^0.4.5",
+    "marked": "^0.3.2"
+  }
+}

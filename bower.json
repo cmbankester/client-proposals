@@ -1,0 +1,17 @@
+{
+  "name": "client-proposals",
+  "version": "0.0.1",
+  "authors": [
+    "Christian Bankester <cbankester@immense.net>"
+  ],
+  "description": "Immense Networks client proposal generator",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
