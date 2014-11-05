@@ -31,7 +31,7 @@ client_tasks =
       queryThenPerformOn(client) 'create-proposal', cb
 
   'create-proposal': (client, cb) ->
-    questions = ['Name the proposal', 'Author name', 'Send-by date (iso)']
+    questions = ['Name the proposal:', 'Author name:', 'Send-by date (iso):']
     answers = []
 
     getProposalInfo = (index, cb) ->
@@ -57,11 +57,12 @@ client_tasks =
             md_file_path = path.join(proposal_path, 'proposal.md')
             md_content = "# #{proposal} #"
 
-            # Proposal Metadata File (would be awesome if we could use MD metadata here...)
+            # Proposal Metadata File (would be awesome if we could use MD metadata instead)
             proposal_metadata =
-              'author': author #TODO Current user (from git?)
+              'author': author # TODO Current user (from git?)
               'proposal-name': proposal
               'send-by': send_by
+
             info_file_path = path.join(proposal_path, 'proposal-info.json')
             info_file_content = "module.exports = #{JSON.stringify proposal_metadata, null, 2}"
 
