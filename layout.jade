@@ -1,0 +1,15 @@
+doctype html
+html(lang="en")
+  head
+    title
+      = [client.name, proposal.name].join(' | ')
+    style
+      include:less style.less
+  body
+    header
+      != header_html
+    main
+      != md_html
+    if (author = proposal.author) && author !== ""
+      footer
+        p Prepared by #{author}.

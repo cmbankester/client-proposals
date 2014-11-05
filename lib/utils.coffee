@@ -3,6 +3,24 @@ path = require 'path'
 readline = require 'readline'
 
 module.exports =
+  # headerFromMarkdown: (markdown, opts, cb) ->
+  #   if 'function' is typeof opts
+  #     cb = opts
+  #     opts = {}
+  #
+
+  replaceFileInClientsDir: (path_name, file_content, opts, cb) ->
+    if 'function' is typeof opts
+      cb = opts
+      opts = {}
+    fs.writeFile path.join('clients', path_name), file_content, cb
+
+  getFileInClientsDir: (path_name, opts, cb) ->
+    if 'function' is typeof opts
+      cb = opts
+      opts = {}
+    fs.readFile path.join('clients', path_name), cb
+
   existsInClientsDir: (path_name, opts, cb) ->
     if 'function' is typeof opts
       cb = opts

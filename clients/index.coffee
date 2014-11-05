@@ -1,10 +1,51 @@
 fs = require 'fs'
 ff = require 'ff'
 path = require 'path'
-{existsInClientsDir, getInput} = require "#{process.cwd()}/lib/cli-utils"
+jade = null
+{replaceFileInClientsDir, existsInClientsDir, getFileInClientsDir, getInput} = require "#{process.cwd()}/lib/utils"
 
 client_tasks =
-  'create': (client, cb) ->
+  'compile-markdown': (client, opts, cb) ->
+    jade or= require 'jade'
+    if not opts or not (proposal = opts.proposal)
+      return cb new Error "Proposal must be provided"
+    proposal_path = undefined
+    parse = require '../lib/markdown-parser'
+
+    (f = ff()).next ->
+      console.log "Compiling markdown for #{client} - #{proposal}"
+      existsInClientsDir client, {is_dir: true}, f.slot()
+
+    f.next (exists) ->
+      if not exists
+        return f.fail new Error "Client #{client} does not exist (create it with 'grunt client:#{client}')"
+      proposal_path = path.join(client, proposal)
+      existsInClientsDir proposal_path, {is_dir: true}, f.slot()
+
+    f.next (exists) ->
+      if not exists
+        return f.fail new Error "Proposal #{proposal} does not exist for client #{client} (create it with 'grunt client:#{client}:create-proposal')"
+      getFileInClientsDir path.join(proposal_path, 'proposal.md'), f.slot()
+
+    f.next (markdown_data) ->
+      parse markdown_data.toString(), f.slot()
+
+    f.next (md_html) ->
+      replaceFileInClientsDir(
+        path.join(proposal_path, 'proposal.html'),
+        jade.renderFile(
+          'layout.jade',
+          pretty: true
+          md_html: md_html
+          header_html: "TODO"
+          proposal: require(path.join('clients', proposal_path, 'proposal-info.json'))
+          client: require(path.join('clients', client, 'client.json'))
+        ), f.wait()
+      )
+
+    f.onComplete cb
+
+  'create': (client, opts, cb) ->
     (f = ff()).next ->
       fs.mkdir path.join("clients", client), f.wait()
 
@@ -17,7 +58,7 @@ client_tasks =
 
     f.next (client_name, primary_contact) ->
       client_object =
-        'client-name': (client_name or client)
+        'name': (client_name or client)
         'primary-contact': primary_contact
 
       # Client Metadata File
@@ -30,7 +71,7 @@ client_tasks =
       console.log "Client #{client} created"
       queryThenPerformOn(client) 'create-proposal', cb
 
-  'create-proposal': (client, cb) ->
+  'create-proposal': (client, opts, cb) ->
     questions = ['Name the proposal:', 'Author name:', 'Send-by date (iso):']
     answers = []
 
@@ -60,7 +101,7 @@ client_tasks =
             # Proposal Metadata File (would be awesome if we could use MD metadata instead)
             proposal_metadata =
               'author': author # TODO Current user (from git?)
-              'proposal-name': proposal
+              'name': proposal
               'send-by': send_by
 
             info_file_path = path.join(proposal_path, 'proposal-info.json')
@@ -73,9 +114,12 @@ client_tasks =
                 if err then return cb err
                 cb null
 
-performOn = (client) -> (task_name, cb) ->
+performOn = (client) -> (task_name, opts, cb) ->
   if task = client_tasks[task_name]
-    task client, cb
+    if 'function' is typeof opts
+      cb = opts
+      opts = {}
+    task client, opts, cb
   else
     cb new Error "Unable to process #{task_name}: task does not exist."
 
