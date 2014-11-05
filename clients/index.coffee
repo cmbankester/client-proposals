@@ -1,7 +1,7 @@
 fs = require 'fs'
 ff = require 'ff'
 path = require 'path'
-{existsInClientsDir, getInput} = require "#{process.cwd()}/utils"
+{existsInClientsDir, getInput} = require "#{process.cwd()}/lib/cli-utils"
 
 client_tasks =
   'create': (client, cb) ->

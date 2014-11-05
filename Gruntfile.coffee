@@ -4,6 +4,12 @@ module.exports = (grunt) ->
     pkg: grunt.file.readJSON("package.json")
 
   grunt.registerTask "default", ->
+    done = @async()
+    parse = require 'lib/markdown-parser'
+    parse '# Foo #', (err, html) ->
+      console.log html
+      done()
+
     # compile markdown files
     # maybe watch for file changes, then compile them as they change?
 
