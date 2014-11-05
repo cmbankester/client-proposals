@@ -14,6 +14,7 @@ Client proposals at Immense Networks
 
 ## TODO ##
 
+* Jade mixins for marked renderers
 * MD -> HTML -> PDF compilation grunt task
 * default grunt task should watch -> compile
 * Client-specific layouts/styles
