@@ -1,8 +1,16 @@
 fs = require 'fs'
 path = require 'path'
 readline = require 'readline'
+phantom = require 'phantom'
 
 module.exports =
+  convertHTMLToPdfAndPlaceAtPath: (html, path_name, cb) ->
+    phantom.create (ph) ->
+      ph.createPage (page) ->
+        page.set 'content', html
+        page.render path.join('clients', path_name), ->
+          ph.exit()
+          cb(null)
   # headerFromMarkdown: (markdown, opts, cb) ->
   #   if 'function' is typeof opts
   #     cb = opts

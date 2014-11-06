@@ -2,7 +2,9 @@ fs = require 'fs'
 ff = require 'ff'
 path = require 'path'
 jade = null
-{replaceFileInClientsDir, existsInClientsDir, getFileInClientsDir, getInput} = require "#{process.cwd()}/lib/utils"
+htmlPdf = null
+
+{convertHTMLToPdfAndPlaceAtPath, replaceFileInClientsDir, existsInClientsDir, getFileInClientsDir, getInput} = require "#{process.cwd()}/lib/utils"
 
 client_tasks =
   'compile-markdown': (client, opts, cb) ->
@@ -10,7 +12,7 @@ client_tasks =
     if not opts or not (proposal = opts.proposal)
       return cb new Error "Proposal must be provided"
     proposal_path = undefined
-    parse = require '../lib/markdown-parser'
+    parseMarkdownToHtml = require '../lib/markdown-parser'
 
     (f = ff()).next ->
       console.log "Compiling markdown for #{client} - #{proposal}"
@@ -28,20 +30,21 @@ client_tasks =
       getFileInClientsDir path.join(proposal_path, 'proposal.md'), f.slot()
 
     f.next (markdown_data) ->
-      parse markdown_data.toString(), f.slot()
+      parseMarkdownToHtml markdown_data.toString(), f.slot()
 
     f.next (md_html) ->
-      replaceFileInClientsDir(
-        path.join(proposal_path, 'proposal.html'),
-        jade.renderFile(
-          'layout.jade',
-          pretty: true
-          md_html: md_html
-          header_html: "TODO"
-          proposal: require(path.join('clients', proposal_path, 'proposal-info.json'))
-          client: require(path.join('clients', client, 'client.json'))
-        ), f.wait()
+      html = jade.renderFile(
+        'layout.jade',
+        pretty: true
+        md_html: md_html
+        header_html: "TODO"
+        proposal: require(path.join('clients', proposal_path, 'proposal-info.json'))
+        client: require(path.join('clients', client, 'client.json'))
       )
+      replaceFileInClientsDir(
+        path.join(proposal_path, 'proposal.html'), html, f.wait()
+      )
+      convertHTMLToPdfAndPlaceAtPath html, path.join(proposal_path, 'proposal.pdf'), f.wait()
 
     f.onComplete cb
 
@@ -63,7 +66,7 @@ client_tasks =
 
       # Client Metadata File
       file_path = path.join('clients', client, 'client.json')
-      file_content = "module.exports = #{JSON.stringify client_object, null, 2}"
+      file_content = JSON.stringify client_object, null, 2
       fs.writeFile file_path, file_content, f.wait()
 
     f.onComplete (err) ->
@@ -105,7 +108,7 @@ client_tasks =
               'send-by': send_by
 
             info_file_path = path.join(proposal_path, 'proposal-info.json')
-            info_file_content = "module.exports = #{JSON.stringify proposal_metadata, null, 2}"
+            info_file_content = JSON.stringify proposal_metadata, null, 2
 
             fs.writeFile md_file_path, md_content, (err) ->
               if err then return cb err
