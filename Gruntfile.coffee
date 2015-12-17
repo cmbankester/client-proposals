@@ -14,7 +14,7 @@ module.exports = (grunt) ->
   grunt.registerTask "compile", (client, proposal) ->
     done = @async()
     if client? and proposal?
-      require('clients').performOn(client) 'compile-markdown', {proposal: proposal}, (err) ->
+      require('./clients').performOn(client) 'compile-markdown', {proposal: proposal}, (err) ->
         if err then return done err
         done()
     else
@@ -22,7 +22,7 @@ module.exports = (grunt) ->
 
   grunt.registerTask "client", (client, subtask) ->
     done = @async()
-    clients = require 'clients'
+    clients = require './clients'
     if client
       clients.exists client, (err, exists) ->
         if err then return done err

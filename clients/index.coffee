@@ -4,6 +4,8 @@ path = require 'path'
 jade = null
 htmlPdf = null
 
+thisDir = "#{process.cwd()}/clients"
+
 {convertHTMLToPdfAndPlaceAtPath, replaceFileInClientsDir, existsInClientsDir, getFileInClientsDir, getInput} = require "#{process.cwd()}/lib/utils"
 
 client_tasks =
@@ -38,8 +40,8 @@ client_tasks =
         pretty: true
         md_html: md_html
         header_html: "TODO"
-        proposal: require(path.join('clients', proposal_path, 'proposal-info.json'))
-        client: require(path.join('clients', client, 'client.json'))
+        proposal: require(path.join(thisDir, proposal_path, 'proposal-info.json'))
+        client: require(path.join(thisDir, client, 'client.json'))
       )
       replaceFileInClientsDir(
         path.join(proposal_path, 'proposal.html'), html, f.wait()
